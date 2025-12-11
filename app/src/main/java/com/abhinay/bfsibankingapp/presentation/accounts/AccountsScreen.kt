@@ -1,5 +1,6 @@
 package com.abhinay.bfsibankingapp.presentation.accounts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import com.abhinay.bfsibankingapp.domain.model.Account
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsScreen(
+    onAccountClick: (String) -> Unit = {},
     viewModel: AccountsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -65,7 +67,8 @@ fun AccountsScreen(
                 }
 
                 is AccountsUiState.Success -> {
-                    AccountsList(accounts = state.accounts)
+                    AccountsList(accounts = state.accounts,
+                        onAccountClick = onAccountClick)
                 }
                 is AccountsUiState.Error -> {
                     Column(
@@ -95,22 +98,28 @@ fun AccountsScreen(
 }
 
 @Composable
-fun AccountsList(accounts: List<Account>) {
+fun AccountsList(accounts: List<Account>,
+                 onAccountClick: (String) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(accounts) { account ->
-            AccountCard(account = account)
+            AccountCard(
+                account = account,
+                onClick = { onAccountClick(account.id)})
         }
     }
 }
 
 @Composable
-fun AccountCard(account: Account) {
+fun AccountCard(account: Account,
+                onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -147,6 +156,12 @@ fun AccountCard(account: Account) {
                 )
 
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Tap to view transactions",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
         }
 
